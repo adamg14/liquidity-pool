@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
@@ -8,10 +8,32 @@ import { DonutChart } from '../components/donut-chart'
 import { LiquidityPortal } from '../components/liquidity-portal'
 import { ArrowUpDown, Clock, DollarSign, LineChart, Wallet } from 'lucide-react'
 import { jetbrainsMono } from './fonts'
+import Axios from 'axios';
 
 export default function PoolPage() {
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState('overview');
+  const [transactions, setTransactions] = useState([]);
+  const [totalSupply, setTotalSupply] = useState(0);
+  const [ownerSupply, setOwnerSupply] = useState(0);
+  const [transactionNumber, setTransactionNumber] = useState(0);
 
+  useEffect(() => {
+    Axios.get("http://localhost:8080/total-supply").then((totalSupplyResult) => {
+      console.log(totalSupplyResult.data.totalSupply);
+      setTotalSupply(totalSupplyResult.data.totalSupply);
+      Axios.get("http://localhost:8080/owner-holdings").then((ownerHoldingsResult) => {
+        setOwnerSupply(ownerHoldingsResult.data.ownerHoldings);
+        Axios.get("http://localhost:8080/transaction-number").then((transactionNumberResult) => {
+          console.log(transactionNumberResult.data.transactionNumber);
+          setTransactionNumber(transactionNumberResult.data.transactionNumber);
+          Axios.get("http://localhost:8080/transactions").then((transactionsResult) => {
+            setTransactions(transactionsResult.data.transactions);
+          })
+        });
+      });
+    });
+  })
+  // total supply, owner supply, transaction number
   const poolData = {
     token0: {
       symbol: 'USDC',
@@ -59,27 +81,27 @@ export default function PoolPage() {
       </header>
 
       <main className="relative container mx-auto p-4 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           <StatCard 
-            title="TVL" 
-            value={poolData.stats.tvl} 
+            title="Total Supply ($ADAM)"
+            value={totalSupply.toString()} 
             icon={<DollarSign className="w-5 h-5" />} 
           />
           <StatCard 
-            title="24h Volume" 
-            value={poolData.stats.volume24h} 
+            title="Owner Supply" 
+            value={ownerSupply.toString()} 
             icon={<ArrowUpDown className="w-5 h-5" />} 
           />
           <StatCard 
-            title="24h Fees" 
-            value={poolData.stats.fees24h} 
+            title="Number of Transactions" 
+            value={transactionNumber.toString()} 
             icon={<Clock className="w-5 h-5" />} 
           />
-          <StatCard 
+          {/* <StatCard 
             title="APR" 
             value={poolData.stats.apr} 
             icon={<LineChart className="w-5 h-5" />} 
-          />
+          /> */}
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
@@ -131,16 +153,18 @@ export default function PoolPage() {
             <Card className="bg-blue-900/80 backdrop-blur-xl border-blue-800">
               <CardContent className="p-8">
                 <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex justify-between items-center p-4 border border-blue-800 rounded-lg hover:bg-blue-800/50 transition-colors">
+                  {transactions.map((transaction) => (
+                    <div key={transaction.timeStamp} className="flex justify-between items-center p-4 border border-blue-800 rounded-lg hover:bg-blue-800/50 transition-colors">
                       <div className="flex items-center gap-4">
                         <ArrowUpDown className="w-4 h-4 text-gray-300" />
                         <div>
                           <p className="text-sm font-medium text-white">Swap</p>
-                          <p className="text-xs text-gray-300">1,123.45 USDC for 0.5 ETH</p>
+                          <p className="text-xs text-gray-300">To: {transaction.to}</p>
+                          <p className="text-xs text-gray-300">From: {transaction.from}</p>
+                          <p className="text-xs text-gray-300">Amount: {parseInt(transaction.value) / (10 ** 18)}</p>
                         </div>
                       </div>
-                      <p className="text-sm text-gray-300">2 mins ago</p>
+                      {/* <p className="text-sm text-gray-300">2 mins ago</p> */}
                     </div>
                   ))}
                 </div>
