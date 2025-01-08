@@ -23,7 +23,7 @@ This project is a decentralised exchange (DEX) liquidity pool application that a
 - [Yarn package manager](https://yarnpkg.com/)
 
 ### Backend
-- [Node.js](https://nodejs.org/en)
+- [Node.js](https://nodejs.org/en). Node version 18 and above.
 - [Yarn package manager](https://yarnpkg.com/)
 - [Express.js](https://expressjs.com/)
 - [Hardhat](https://hardhat.org/)

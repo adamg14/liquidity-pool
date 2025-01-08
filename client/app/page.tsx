@@ -17,22 +17,38 @@ export default function PoolPage() {
   const [ownerSupply, setOwnerSupply] = useState(0);
   const [transactionNumber, setTransactionNumber] = useState(0);
 
+  // // Axios.get("http://localhost:8080/total-supply").then((totalSupplyResult) => {
+  //   console.log(totalSupplyResult.data.totalSupply);
+  //   setTotalSupply(totalSupplyResult.data.totalSupply);
+  //   Axios.get("http://localhost:8080/owner-holdings").then((ownerHoldingsResult) => {
+  //     setOwnerSupply(ownerHoldingsResult.data.ownerHoldings);
+  //     Axios.get("http://localhost:8080/transaction-number").then((transactionNumberResult) => {
+  //       console.log(transactionNumberResult.data.transactionNumber);
+  //       setTransactionNumber(transactionNumberResult.data.transactionNumber);
+  //       Axios.get("http://localhost:8080/transactions").then((transactionsResult) => {
+  //         setTransactions(transactionsResult.data.transactions);
+  //       })
+  //     });
+  //   });
+  // });
   useEffect(() => {
-    Axios.get("http://localhost:8080/total-supply").then((totalSupplyResult) => {
-      console.log(totalSupplyResult.data.totalSupply);
-      setTotalSupply(totalSupplyResult.data.totalSupply);
-      Axios.get("http://localhost:8080/owner-holdings").then((ownerHoldingsResult) => {
-        setOwnerSupply(ownerHoldingsResult.data.ownerHoldings);
-        Axios.get("http://localhost:8080/transaction-number").then((transactionNumberResult) => {
-          console.log(transactionNumberResult.data.transactionNumber);
-          setTransactionNumber(transactionNumberResult.data.transactionNumber);
-          Axios.get("http://localhost:8080/transactions").then((transactionsResult) => {
-            setTransactions(transactionsResult.data.transactions);
-          })
-        });
-      });
-    });
-  })
+    const fetchAPIData = async () => {
+      const totalSupplyResult = (await Axios.get("http://localhost:8080/total-supply")).data.totalSupply;
+      const ownerHoldingResult = (await Axios.get("http://localhost:8080/owner-holdings")).data.ownerHoldings;
+      const transactionNumberResult = (await Axios.get("http://localhost:8080/transaction-number")).data.transactionNumber;
+      const transactionResult = (await Axios.get("http://localhost:8080/transactions")).data.transactions;
+
+      setTransactions(transactionResult);
+      setTransactionNumber(transactionNumberResult);
+      setOwnerSupply(ownerHoldingResult);
+      setTotalSupply(totalSupplyResult);
+
+      console.log("hello world");
+    }
+
+    fetchAPIData();
+  }, []);
+
   // total supply, owner supply, transaction number
   const poolData = {
     token0: {
